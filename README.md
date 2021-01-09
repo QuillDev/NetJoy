@@ -25,7 +25,7 @@ port = 6069
 * Change port to your desired port number.
 * configure ngrok to use your ngrok token using by running 
 ```
-ngrok authorize TOKEN_GOES_HERE
+ngrok authtoken TOKEN_GOES_HERE
 ```
 
 > EXTRA STEP FOR CLIENTS
