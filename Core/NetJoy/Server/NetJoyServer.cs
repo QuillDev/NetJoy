@@ -20,15 +20,17 @@ namespace NetJoy.Core.NetJoy.Server
         private Socket _clientSocket = null; //the connected client socket 
         private readonly Configuration _configuration; //the configuration of the client 
         private readonly ManualResetEvent _allDone = new ManualResetEvent(false); //thread signal for the server
+        private readonly NgrokUtils _ngrok;
         
         
         /// <summary>
         /// Create a NetJoy Server
         /// </summary>
         /// <param name="configuration">config to launch the server with</param>
-        public NetJoyServer(Configuration configuration)
+        public NetJoyServer(Configuration configuration, NgrokUtils ngrok)
         {
             _configuration = configuration;
+            _ngrok = ngrok;
         }
         
         /// <summary>
@@ -69,6 +71,9 @@ namespace NetJoy.Core.NetJoy.Server
                 //log that we started the server
                 Logger.Debug($"Started Server @{ip}:{_configuration.server.port}");
                 
+                //start an ngrok server for connecting to externally
+                _ngrok.Start();
+
                 // Create a TCP/IP socket.
                 var listener = new Socket(ip.AddressFamily,  
                     SocketType.Stream, ProtocolType.Tcp );  

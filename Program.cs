@@ -50,6 +50,7 @@ namespace NetJoy
                 .AddSingleton<NetJoyManager>()
                 .AddSingleton<NetJoyClient>()
                 .AddSingleton<NetJoyServer>()
+                .AddSingleton<NgrokUtils>()
                 .BuildServiceProvider();
         }
     }
