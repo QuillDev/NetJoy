@@ -5,16 +5,18 @@ namespace NetJoy.Core.NetJoy.Packets
 {
     public class StatePacket
     {
-        public string offset;
-        public ushort value;
-        
         public StatePacket(JoystickUpdate state)
         {
+            
             //get the offset of the state
-            offset = state.Offset.ToString();
+            Offset = state.Offset.ToString();
             
             //get the value of the state
-            value = Convert.ToUInt16(state.Value);
+            Value = Convert.ToUInt16(state.Value);
         }
+
+        public string Offset { get; set; }
+
+        public ushort Value { get; set; }
     }
 }

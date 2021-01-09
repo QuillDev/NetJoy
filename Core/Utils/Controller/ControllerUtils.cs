@@ -12,7 +12,7 @@ namespace NetJoy.Core.Utils.Controller
         /// <returns></returns>
         public static Xbox360Button StateToXbox360Button(StatePacket packet)
         {
-            return packet.offset switch
+            return packet.Offset switch
             {
                 "Buttons0" => Xbox360Button.A,
                 "Buttons1" => Xbox360Button.B,
@@ -35,7 +35,7 @@ namespace NetJoy.Core.Utils.Controller
         /// <returns></returns>
         public static Xbox360Axis StateToXbox360Axis(StatePacket packet)
         {
-            return packet.offset switch
+            return packet.Offset switch
             {
                 "X" => Xbox360Axis.LeftThumbX,
                 "Y" => Xbox360Axis.LeftThumbY,

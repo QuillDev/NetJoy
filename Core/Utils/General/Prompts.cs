@@ -3,7 +3,7 @@ using NetJoy.Core.Utils.General;
 
 namespace NetJoy.Core.Utils
 {
-    public class Prompts
+    public static class Prompts
     {
         public static bool YesNoPrompt(string question)
         {

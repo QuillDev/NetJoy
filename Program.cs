@@ -11,7 +11,7 @@ using NetJoy.Core.Utils;
 
 namespace NetJoy
 {
-    class Program
+    static class Program
     {
         //create the configuration field
         private static readonly Configuration Config = ConfigService.ReadConfig();

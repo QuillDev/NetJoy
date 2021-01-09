@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using NetJoy.Core.Config;
 using NetJoy.Core.NetJoy.Packets;
-using NetJoy.Core.Utils;
 using NetJoy.Core.Utils.General;
 using Newtonsoft.Json;
 using SharpDX.DirectInput;
@@ -15,19 +14,20 @@ using Encoding = System.Text.Encoding;
 
 namespace NetJoy.Core.NetJoy.Server
 {
-    public sealed class NetJoyServer
+    public sealed class NetJoyServer : IDisposable
     {
         private Joystick _joystick; //joystick we're polling for input
-        private Socket _clientSocket = null; //the connected client socket 
+        private Socket _clientSocket; //the connected client socket 
         private readonly Configuration _configuration; //the configuration of the client 
         private readonly ManualResetEvent _allDone = new ManualResetEvent(false); //thread signal for the server
         private readonly NgrokUtils _ngrok;
-        
-        
+
+
         /// <summary>
         /// Create a NetJoy Server
         /// </summary>
         /// <param name="configuration">config to launch the server with</param>
+        /// <param name="ngrok">ngrok utils</param>
         public NetJoyServer(Configuration configuration, NgrokUtils ngrok)
         {
             _configuration = configuration;
@@ -273,6 +273,13 @@ namespace NetJoy.Core.NetJoy.Server
                 //log an error
                 Logger.LogError("Invalid Input, Please select from the sticks below!");
             } while (true);
+        }
+
+        public void Dispose()
+        {
+            _joystick?.Dispose();
+            _clientSocket?.Dispose();
+            _allDone?.Dispose();
         }
     }
 }

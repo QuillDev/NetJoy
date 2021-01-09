@@ -11,7 +11,7 @@ using Encoding = System.Text.Encoding;
 
 namespace NetJoy.Core.NetJoy.Client
 {
-    public class NetJoyClient
+    public class NetJoyClient : IDisposable
     {
         private Socket _client; //the client socket
         private JoyHandler _joyHandler; // the joystick handler instance
@@ -41,7 +41,7 @@ namespace NetJoy.Core.NetJoy.Client
             _joyHandler = new JoyHandler();
             
             //connect to the entered server
-            await Connect(host, port);
+            await Connect(host, port).ConfigureAwait(false);
         }
         
         /// <summary>
@@ -121,7 +121,7 @@ namespace NetJoy.Core.NetJoy.Client
                     //read from the socket
                     Read();
                 }
-            });
+            }).ConfigureAwait(false);
         }
         
         /// <summary>
@@ -169,13 +169,13 @@ namespace NetJoy.Core.NetJoy.Client
             
             //if the json is null, return
 
-            if (json?.offset == null)
+            if (json?.Offset == null)
             {
                 return;
             }
             
             //if what we pressed was a button, handle it as a button
-            if (json.offset.Contains("Button"))
+            if (json.Offset.Contains("Button"))
             {
                 HandleButtonUpdate(json);
             }
@@ -230,6 +230,12 @@ namespace NetJoy.Core.NetJoy.Client
             {
                 Logger.LogError(e.Message);
             }
+        }
+
+        public void Dispose()
+        {
+            _client?.Dispose();
+            _connectDone?.Dispose();
         }
     }
 }

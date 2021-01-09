@@ -47,7 +47,7 @@ namespace NetJoy.Core.NetJoy.Client.Handling
             }
             
             //get whether the button was pressed
-            var pressed = ( packet.value == 128 );
+            var pressed = ( packet.Value == 128 );
             
             //set the given button
             _controller.SetButtonState(button, pressed);
@@ -65,7 +65,7 @@ namespace NetJoy.Core.NetJoy.Client.Handling
             try
             {
 
-                var src = state.value - MaxValue;
+                var src = state.Value - MaxValue;
                 
                 //convert the ushort value to a short
                 var value = src > (ushort) MaxValue
