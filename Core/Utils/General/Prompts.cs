@@ -24,7 +24,7 @@ namespace NetJoy.Core.Utils
                 }
                 
                 //set input to lower case
-                input = input.ToLower();
+                input = input.ToLowerInvariant();
                 
                 //if they entered yes, return true
                 if (input.Equals("y"))

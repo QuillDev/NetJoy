@@ -4,7 +4,7 @@ namespace NetJoy.Core.Config
 {
     public class DefaultConfig
     {
-        public bool isServer { get; set; } = false;
+        public bool isServer { get; set; }
         public Client server{ get; set;  } = new Client();
     }
 

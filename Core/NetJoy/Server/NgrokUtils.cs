@@ -88,7 +88,7 @@ namespace NetJoy.Core.NetJoy.Server
         {
             new Process
             {
-                StartInfo = new ProcessStartInfo()
+                StartInfo = new ProcessStartInfo
                 {
                     UseShellExecute = false,
                     CreateNoWindow = true,
