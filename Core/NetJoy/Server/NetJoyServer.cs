@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using NetJoy.Core.Config;
 using NetJoy.Core.NetJoy.Packets;
+using NetJoy.Core.Utils;
 using Newtonsoft.Json;
 using SharpDX.DirectInput;
 
@@ -12,7 +14,7 @@ using Encoding = System.Text.Encoding;
 
 namespace NetJoy.Core.NetJoy.Server
 {
-    public class NetJoyServer
+    public sealed class NetJoyServer
     {
         private Joystick _joystick; //joystick we're polling for input
         private Socket _clientSocket = null; //the connected client socket 
@@ -45,6 +47,7 @@ namespace NetJoy.Core.NetJoy.Server
                 var serverListener = StartServerListener();
                 var controllerListener = StartControllerListener();
                 
+                
                 //wait for all tasks to complete 
                 Task.WhenAll(serverListener, controllerListener);
             }).ConfigureAwait(false);
@@ -64,7 +67,7 @@ namespace NetJoy.Core.NetJoy.Server
                 var localEndPoint = new IPEndPoint(IPAddress.Any, _configuration.server.port);
                 
                 //log that we started the server
-                Console.WriteLine($"Started Server @{ip}:{_configuration.server.port}");
+                Logger.Debug($"Started Server @{ip}:{_configuration.server.port}");
                 
                 // Create a TCP/IP socket.
                 var listener = new Socket(ip.AddressFamily,  
@@ -81,7 +84,7 @@ namespace NetJoy.Core.NetJoy.Server
                         _allDone.Reset();  
   
                         // Start an asynchronous socket to listen for connections.  
-                        Console.WriteLine("Waiting for a connection...");  
+                        Logger.Debug("Waiting for a connection...");  
                         listener.BeginAccept(
                             AcceptCallback,  
                             listener );  
@@ -178,27 +181,14 @@ namespace NetJoy.Core.NetJoy.Server
         private void GetJoystick()
         {
             var directInput = new DirectInput();
-            var joystickGuid = Guid.Empty;
-            
-            //try to get a gamepad
-            foreach (var deviceInstance in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
-            {
-                joystickGuid = deviceInstance.InstanceGuid;
-            }
-            
-            // If Gamepad not found, look for a Joystick
-            if (joystickGuid == Guid.Empty)
-            {
-                foreach (var deviceInstance in directInput.GetDevices(DeviceType.Joystick, DeviceEnumerationFlags.AllDevices))
-                {
-                    joystickGuid = deviceInstance.InstanceGuid;
-                }
-            }
-            
+
+            //get the joystick guid & select a stick
+            var joystickGuid = SelectStick(directInput);
+
             // If Joystick not found, throws an error
             if (joystickGuid == Guid.Empty)
             {
-                Console.WriteLine("No joystick/Gamepad found.");
+                Logger.LogError("No joystick/Gamepad found.");
                 Console.ReadKey();
                 Environment.Exit(1);
             }
@@ -207,7 +197,7 @@ namespace NetJoy.Core.NetJoy.Server
             _joystick= new Joystick(directInput, joystickGuid);
             
             //log that we found a joystick
-            Console.WriteLine($"Found Joystick with GUID: {joystickGuid}");
+            Logger.Debug($"Found Joystick with GUID: {joystickGuid}");
             
             //query all available effects
             var allEffects = _joystick.GetEffects();
@@ -215,7 +205,7 @@ namespace NetJoy.Core.NetJoy.Server
             //log all of the available effects
             foreach (var effect in allEffects)
             {
-                Console.WriteLine($"Found Effect: {effect}");
+                Logger.Log($"Found Effect: {effect}");
             }
             
             //set the buffer size for the joystick
@@ -223,6 +213,60 @@ namespace NetJoy.Core.NetJoy.Server
             
             //acquire the joystick
             _joystick.Acquire();
+        }
+        
+        /// <summary>
+        /// Draw menu for selecting a stick
+        /// </summary>
+        /// <param name="directInput"> stick to select</param>
+        /// <returns></returns>
+        private Guid SelectStick(DirectInput directInput)
+        {
+            do
+            {
+                //the joysticks to select from
+                var joysticks = directInput.GetDevices(DeviceType.Joystick, DeviceEnumerationFlags.AllDevices);
+
+                //add all detected gamepads to the joystick list
+                foreach (var pad in directInput.GetDevices(DeviceType.Gamepad, DeviceEnumerationFlags.AllDevices))
+                {
+                    joysticks.Add(pad);
+                }
+
+                //Log the joysticks
+                for (var index = 0; index < joysticks.Count; index++)
+                {
+                    var stick = joysticks[index];
+
+                    Logger.Log($"{index + 1}) {stick.ProductName}");
+                }
+                
+                //Log message depending on joysticks
+                Logger.Log(!joysticks.Any()
+                    ? "Plug in a joystick & press enter to rescan!"
+                    : "Enter the ID of the stick you wish to use: ");
+                
+                //check if the input from the console is valid
+                var validInput = int.TryParse(Console.ReadLine(), out var choice);
+                
+                //if the input was invalid continue
+                if (validInput && choice >= 1 && choice <= joysticks.Count)
+                {
+                    //clear the console
+                    Console.Clear();
+                    
+                    //select the stick and log it
+                    var stick = joysticks[choice - 1];
+                    Logger.Debug($"Selected Joystick: {stick.ProductName}");
+                    return stick.InstanceGuid;
+                }
+                
+                //clear the logger
+                Logger.Clear();
+                
+                //log an error
+                Logger.LogError("Invalid Input, Please select from the sticks below!");
+            } while (true);
         }
     }
 }
