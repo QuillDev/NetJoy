@@ -19,5 +19,8 @@ port = 6069
 > EXTRA STEP FOR SERVERS
 * Open config.toml and set isServer to true.
 * Change port to your desired port number.
+> EXTRA STEP FOR CLIENTS
+* Install vJoy from [here](http://vjoystick.sourceforge.net/site/index.php/download-a-install/download)
+* Complete install & restart
 > Both Clients & Servers
 * Run NetJoy.exe & follow instructions.
