@@ -99,7 +99,7 @@ namespace NetJoy.Core.NetJoy.Server
                     }  
   
                 } catch (Exception e) {  
-                    Console.WriteLine(e.ToString());  
+                    Logger.LogError(e.Message);
                 }
             }).ConfigureAwait(false);
         }
@@ -120,7 +120,7 @@ namespace NetJoy.Core.NetJoy.Server
             //set the client socket
             _clientSocket = handler;
             
-            Console.WriteLine($"Accepted connection from Client");
+            Logger.Debug($"Accepted connection from Client");
         }
         
         /// <summary>

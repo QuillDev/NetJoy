@@ -29,7 +29,7 @@ namespace NetJoy.Core.Utils
         public static void Log(string message)
         {
             Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine(message);
+            Console.WriteLine($"[LOG]: " + message);
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace NetJoy.Core.Utils
         public static void Debug(string message)
         {
             Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine($"[DEBUG] {message}");
+            Console.WriteLine("[DEBUG]: " + message);
         }
     }
 }

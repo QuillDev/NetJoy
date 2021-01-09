@@ -1,5 +1,14 @@
 ﻿using System;
+using System.Threading;
+using Nefarius.ViGEm.Client;
+using Nefarius.ViGEm.Client.Targets;
+using Nefarius.ViGEm.Client.Targets.Xbox360;
+using NetJoy.Core.NetJoy.Packets;
+using NetJoy.Core.Utils;
+using NetJoy.Core.Utils.Controller;
+using SharpDX.DirectInput;
 using vJoyInterfaceWrap;
+using static System.Int16;
 
 namespace NetJoy.Core.NetJoy.Client.Handling
 {
@@ -7,170 +16,73 @@ namespace NetJoy.Core.NetJoy.Client.Handling
     // Don't forget to add this
     public class JoyHandler
     {
-        //the port for the controller
-        private readonly uint _port;
-        private readonly vJoy _joystick;
-        
-        public JoyHandler(uint port)
+        private readonly IXbox360Controller _controller;
+        public JoyHandler()
         {
+            //Create a new ViGem Client
+            var client = new ViGEmClient();
             
-            //set the joystick port
-            _port = port;
+            //create the controller
+            _controller = client.CreateXbox360Controller();
             
-            //create a new vJoy instance
-            _joystick = new vJoy();
+            //connect the controller?
+            _controller.Connect();
+
+            Thread.Sleep(500);
+            _controller.SetButtonState(Xbox360Button.X, false);
             
-            //if vJoy is not enabled
-            if (!_joystick.vJoyEnabled())
-            {
-                //if vJoy is not enabled throw an exception
-                throw new Exception("vJoy is not enabled!");
-            }
-            
-            //log information about the joystick driver
-            LogJoystickInfo(_joystick);
-            
-            //check whether the dll version and the driver version match
-            CheckVersions(_joystick);
-            
-            //check whether the device is available
-            var available = IsDeviceAvailable(_joystick, _port);
-            
-            //if the joystick is not available we can't use it
-            if (!available)
-            {
-                throw new Exception("Joystick is not available and therefore cannot be used! Free the joystick before restarting the program!");
-            }
-            
-            //try to acquire the device
-            var acquired = AcquireDevice(_joystick, port);
-            
-            //if we failed to acquire the device, throw an exception
-            if (!acquired)
-            {
-                throw new Exception($"Failed to acquire device @ port {_port}");
-            }
         }
         
         /// <summary>
-        /// Try to set the button with the given id to the given sate
+        /// Set a button from the given packet
         /// </summary>
-        /// <param name="id">of button to change state of</param>
-        /// <param name="pressed">whether the button should be pressed</param>
-        public void setButton(int id, bool pressed)
+        /// <param name="packet">data to use for setting button</param>
+        public void SetButton(StatePacket packet)
         {
+            //Get the button from the packet data
+            var button = ControllerUtils.StateToXbox360Button(packet);
+            
+            //if we got an incompatible button, return
+            if (button == null)
+            {
+                return;
+            }
+            
+            //get whether the button was pressed
+            var pressed = ( packet.value == 128 );
+            
+            //set the given button
+            _controller.SetButtonState(button, pressed);
+        }
+
+        /// <summary>
+        /// Set the value of the axis to the given one
+        /// </summary>
+        /// <param name="state">The state to use for setting the controller</param>
+        public void SetAxis(StatePacket state)
+        {
+            //convert the state to a controller axis
+            var axis = ControllerUtils.StateToXbox360Axis(state);
+            
             try
             {
-                _joystick.SetBtn(pressed, _port, (uint) id);
-            }
-            catch
-            {
-                //ignored
-            }
-        }
-        /// <summary>
-        /// Convert a double percentage to an axis value
-        /// </summary>
-        /// <param name="percent"></param>
-        /// <returns>The Joystick value from 0 - 65536</returns>
-        private int PercentToAxisValue(double percent)
-        {
-            return (int) (short.MaxValue * percent);
-        }
-        
-        /// <summary>
-        /// Acquire the device to be fed from joystick input
-        /// </summary>
-        /// <param name="joy">driver to use</param>
-        /// <param name="port">to acquire</param>
-        /// <returns></returns>
-        private bool AcquireDevice(vJoy joy, uint port)
-        {
-            //get the status of the joystick @ the given port
-            var status = joy.GetVJDStatus(port);
 
-            // Acquire the target
-            if (status == VjdStat.VJD_STAT_OWN ||
-                (status == VjdStat.VJD_STAT_FREE) && (!joy.AcquireVJD(port)))
-            {
-                Console.WriteLine($"Failed to acquire vJoy device number {port}.");
-                return false;
+                var src = state.value - MaxValue;
+                
+                //convert the ushort value to a short
+                var value = src > (ushort) MaxValue
+                    ? MaxValue
+                    : (short) src;
+                
+                //NOTE: 0 is the middle point, values go from (-32768 => 32768)
+                //set the value of the axis from the controller
+                _controller.SetAxisValue(axis, value);
             }
-            
-            Console.WriteLine($"Acquired: vJoy device number {port}.");
-            return true;
+            catch (Exception e)
+            {
+                Logger.LogError(e.Message);
+            }
 
-        }
-        
-        /// <summary>
-        /// Check whether the given device is available or not
-        /// </summary>
-        /// <param name="joy">to check</param>
-        /// <param name="id">of the device in question</param>
-        /// <returns></returns>
-        private bool IsDeviceAvailable(vJoy joy, uint id)
-        {
-            // Get the state of the requested device
-            var status = joy.GetVJDStatus(id);
-            switch (status)
-            {
-                case VjdStat.VJD_STAT_FREE:
-                    Console.WriteLine("vJoy Device {0} is free\n", id);
-                    return true;
-                case VjdStat.VJD_STAT_OWN:
-                    Console.WriteLine("vJoy Device {0} is already owned by this feeder\n", id);
-                    return true;
-                case VjdStat.VJD_STAT_BUSY:
-                    Console.WriteLine(
-                        "vJoy Device {0} is already owned by another feeder\nCannot continue\n", id);
-                    break;
-                case VjdStat.VJD_STAT_MISS:
-                    Console.WriteLine(
-                        "vJoy Device {0} is not installed or disabled\nCannot continue\n", id);
-                    break;
-                case VjdStat.VJD_STAT_UNKN:
-                    break;
-                default:
-                    Console.WriteLine("vJoy Device {0} general error\nCannot continue\n", id);
-                    break;
-            };
-
-            return false;
-        }
-        
-        /// <summary>
-        /// Log information about the joystick driver
-        /// </summary>
-        /// <param name="joy"></param>
-        private void LogJoystickInfo(vJoy joy)
-        {
-            //log vJoy information
-            Console.WriteLine("vJoy Information:\nVendor: {0}\nProduct: {1}\nVersion Number: {2}\n",
-                joy.GetvJoyManufacturerString(),
-                joy.GetvJoyProductString(),
-                joy.GetvJoySerialNumberString());
-        }
-        
-        /// <summary>
-        /// Check whether the versions of the driver and the dll used match
-        /// </summary>
-        /// <param name="joy">The vJoy instance to check</param>
-        private void CheckVersions(vJoy joy)
-        {
-            //Check if dll and driver version match
-            uint dllVer = 0, drvVer = 0;
-            var match = joy.DriverMatch(ref dllVer, ref drvVer);
-            
-            //Log data depending on whether they matched or not
-            if (match)
-            {
-                Console.WriteLine("Version of Driver Matches DLL Version ({0:X})\n", dllVer);
-            }
-            else
-            {
-                Console.WriteLine("Version of Driver ({0:X}) does NOT match DLL Version ({1:X})\nIf you experience errors please upgrade/downgrade accordingly!",
-                    drvVer, dllVer);
-            }
         }
     }
 }

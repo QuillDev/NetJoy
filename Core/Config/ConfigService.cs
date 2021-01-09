@@ -1,16 +1,15 @@
 ﻿using System;
 using System.IO;
+using NetJoy.Core.Utils;
 using Nett;
 
 namespace NetJoy.Core.Config
 {
-    public class ConfigService
+    public static class ConfigService
     {
         
         //the filename for the toml file
-        private static readonly string fileName = "config.toml";
-        
-        public ConfigService(){}
+        private const string FileName = "config.toml";
 
         public static Configuration ReadConfig()
         {
@@ -18,21 +17,21 @@ namespace NetJoy.Core.Config
             {
                 
                 //If the file exists, just read it
-                if (File.Exists(fileName))
+                if (File.Exists(FileName))
                 {
-                    return Toml.ReadFile<Configuration>(fileName);
+                    return Toml.ReadFile<Configuration>(FileName);
                 }
                 
                 //write the default config file
-                Console.WriteLine("No config file detected, making one with default settings");
-                Toml.WriteFile(new DefaultConfig(), fileName);
+                Logger.Log("No config file detected, making one with default settings");
+                Toml.WriteFile(new DefaultConfig(), FileName);
 
-                return Toml.ReadFile<Configuration>(fileName);
+                return Toml.ReadFile<Configuration>(FileName);
             }
             catch(Exception e)
             {
-                Console.WriteLine(e);
-                Console.WriteLine("Error reading config file, maybe it's corrupted?");
+                Logger.LogError(e.Message);
+                Logger.LogError("Error reading config file, maybe it's corrupted?");
             }
             
             return new Configuration();

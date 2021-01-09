@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using NetJoy.Core.Config;
 using NetJoy.Core.NetJoy.Client.Handling;
 using NetJoy.Core.NetJoy.Packets;
+using NetJoy.Core.Utils;
 using Newtonsoft.Json;
 using Encoding = System.Text.Encoding;
 
@@ -34,30 +36,28 @@ namespace NetJoy.Core.NetJoy.Client
         {
             
             //log that we want an address
-            Console.WriteLine("Enter the IP address to connect to");
+            Logger.Log("Enter the IP address to connect to");
             
             var host = Console.ReadLine();
             
             //Enter the port to connect to
-            Console.WriteLine("Enter the port to connect to: ");
+            Logger.Log("Enter the port to connect to: ");
             
             //create the boolean for whether the int is valid
             var port = GetValidInt();
             
-            //Enter the joystick port
-            Console.WriteLine("Enter The Joystick Port: ");
-            
-            //get a joystick port from the console
-            var joystickPort = GetValidInt();
-            
             //create a new joystick handler using the given joystick port
-            _joyHandler = new JoyHandler(( uint ) joystickPort);
+            _joyHandler = new JoyHandler();
             
             //connect to the entered server
             await Connect(host, port);
         }
-
-        public int GetValidInt()
+        
+        /// <summary>
+        /// Get a valid int as input
+        /// </summary>
+        /// <returns>a valid integer</returns>
+        private int GetValidInt()
         {
             
             bool valid;
@@ -73,20 +73,21 @@ namespace NetJoy.Core.NetJoy.Client
                 //if it was not valid, ask again
                 if (!valid)
                 {
-                    Console.WriteLine("Invalid number, Please try again: ");
+                    Logger.LogError("Invalid number, Please try again: ");
                 }
             } while (!valid);
 
 
             return port;
         }
+        
         /// <summary>
         /// Connect to the given host and port
         /// </summary>
         /// <param name="host">to connect to</param>
         /// <param name="port">to connect to</param>
         /// <returns></returns>
-        public async Task Connect(string host, int port)
+        private async Task Connect(string host, int port)
         {
             // Connect to a remote device.  
             try
@@ -101,7 +102,7 @@ namespace NetJoy.Core.NetJoy.Client
                     SocketType.Stream, ProtocolType.Tcp);
                 
                 //Log that we're trying to connect
-                Console.WriteLine("Trying to connect to remote server...");
+                Logger.Log("Trying to connect to remote server...");
                 
                 // Connect to the remote endpoint.  
                 client.BeginConnect(remoteEp,
@@ -112,7 +113,7 @@ namespace NetJoy.Core.NetJoy.Client
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logger.LogError(e.Message);
             }
             
             //Run the tasks
@@ -135,7 +136,7 @@ namespace NetJoy.Core.NetJoy.Client
         /// <summary>
         /// Try to read the data from the socket
         /// </summary>
-        public void Read()
+        private void Read()
         {
             //if the client is null, return
             if (_client == null)
@@ -187,38 +188,28 @@ namespace NetJoy.Core.NetJoy.Client
             {
                 HandleButtonUpdate(json);
             }
+            else
+            {
+                HandleAxisUpdate(json);
+            }
         }
         
+        /// <summary>
+        /// Handle an axis update from the joystick
+        /// </summary>
+        /// <param name="packet"></param>
+        private void HandleAxisUpdate(StatePacket packet)
+        {
+            //set the axis to the given value
+            _joyHandler.SetAxis(packet);
+        }
         /// <summary>
         /// Handle the update as if the packet were a button
         /// </summary>
         /// <param name="packet">the packet to use for the update</param>
         private void HandleButtonUpdate(StatePacket packet)
         {
-            //set index to an impossible number
-
-            //try to parse the int
-            var success = int.TryParse(packet.offset.Substring("Button".Length + 1), out var index);
-            
-            //if we failed to parse the int, return
-            if (!success)
-            {
-                return;
-            }
-            
-            index++; //add one to the index
-            
-            //if the index is an invalid number, return
-            if (index <= 0)
-            {
-                return;
-            }
-            
-            //get the button state, if the int is 128 it means the button is down (true)
-            var buttonState = (packet.value == 128);
-            
-            //set the button to the given button state
-            _joyHandler.setButton(index, buttonState);
+            _joyHandler.SetButton(packet);
         }
         
         /// <summary>
@@ -234,9 +225,9 @@ namespace NetJoy.Core.NetJoy.Client
 
                 // Complete the connection.  
                 client.EndConnect(ar);
-
-                Console.WriteLine("Socket connected to {0}",
-                    client.RemoteEndPoint);
+                
+                //log that we connected
+                Logger.Debug($"Socket connected to {client.RemoteEndPoint}");
 
                 // Signal that the connection has been made.  
                 _connectDone.Set();
@@ -246,7 +237,7 @@ namespace NetJoy.Core.NetJoy.Client
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Logger.LogError(e.Message);
             }
         }
     }

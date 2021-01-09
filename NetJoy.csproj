@@ -14,6 +14,7 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
+      <PackageReference Include="Nefarius.ViGEm.Client" Version="1.16.150" />
       <PackageReference Include="Nett" Version="0.15.0" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
       <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />

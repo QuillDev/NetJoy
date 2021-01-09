@@ -1,8 +1,10 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using NetJoy.Core.Config;
 using NetJoy.Core.NetJoy.Client;
 using NetJoy.Core.NetJoy.Server;
+using NetJoy.Core.Utils;
 
 namespace NetJoy.Core.NetJoy
 {
@@ -26,14 +28,17 @@ namespace NetJoy.Core.NetJoy
         /// <returns></returns>
         public async Task Start()
         {
+            //ask whether they want to start it as a server
+            var server = Prompts.YesNoPrompt("Start as Server?");
+            
             //start either the client or the server depending on the config file
-            if (_config.isServer)
+            if (server)
             {
                 await _server.Start();
             }
             else
             {
-                _client.Start();
+                await _client.Start();
             }
         }
     }

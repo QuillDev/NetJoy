@@ -46,7 +46,6 @@ namespace NetJoy
         {
             return new ServiceCollection()
                 .AddSingleton(Config)
-                .AddSingleton<Debug>()
                 .AddSingleton<NetJoyManager>()
                 .AddSingleton<NetJoyClient>()
                 .AddSingleton<NetJoyServer>()
