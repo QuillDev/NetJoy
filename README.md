@@ -24,12 +24,9 @@ port = 6069
 * Open config.toml and set isServer to true.
 * Change port to your desired port number.
 * configure ngrok to use your ngrok token using by running 
-<br>
-``
+```
 ngrok authorize TOKEN_GOES_HERE
-``
-<br>
-in the unzipped folder.
+```
 
 > EXTRA STEP FOR CLIENTS
 * Install vJoy from [here](http://vjoystick.sourceforge.net/site/index.php/download-a-install/download)
