@@ -23,7 +23,7 @@ port = 6069
 > EXTRA STEP FOR SERVERS
 * Open config.toml and set isServer to true.
 * Change port to your desired port number.
-* configure ngrok to use your ngrok token using by running 
+* configure ngrok to use your ngrok token [FROM HERE](https://ngrok.com/) using by running 
 ```
 ngrok authtoken TOKEN_GOES_HERE
 ```
