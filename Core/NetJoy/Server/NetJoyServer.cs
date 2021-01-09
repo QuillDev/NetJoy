@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using NetJoy.Core.Config;
 using NetJoy.Core.NetJoy.Packets;
 using NetJoy.Core.Utils;
+using NetJoy.Core.Utils.General;
 using Newtonsoft.Json;
 using SharpDX.DirectInput;
 

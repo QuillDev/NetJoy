@@ -3,7 +3,7 @@ using NetJoy.Core.NetJoy.Packets;
 
 namespace NetJoy.Core.Utils.Controller
 {
-    public class ControllerUtils
+    public static class ControllerUtils
     {
         /// <summary>
         /// Get the Xbox360Button for the given string

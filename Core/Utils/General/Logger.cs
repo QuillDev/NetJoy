@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetJoy.Core.Utils
+namespace NetJoy.Core.Utils.General
 {
     public static class Logger
     {

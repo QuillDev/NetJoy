@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using NetJoy.Core.Config;
 using NetJoy.Core.Utils;
+using NetJoy.Core.Utils.General;
 using Newtonsoft.Json.Linq;
 
 namespace NetJoy.Core.NetJoy.Server
@@ -20,31 +21,31 @@ namespace NetJoy.Core.NetJoy.Server
         {
             
             
-            //get the address string for ngrock
+            //get the address string for Ngrock
             var address = GetNgrok();
             
             //if we already have an instance skip the spawning process
             if (address != null)
             {
-                Logger.Debug("Found existing ngrock instance @" + address);
+                Logger.Debug("Found existing Ngrock instance @" + address);
                 return;
             }
             
             //log that we couldn't find any instances
-            Logger.Debug("No existing ngrock instances. Spawning new instance.");
+            Logger.Debug("No existing Ngrock instances. Spawning new instance.");
             
             //spawn a new ngrok instance
-            SpawnNgrock(_port);
+            SpawnNgrock();
             
             //log that we created a new ngrock instance
-            Logger.Debug("Spawned ngrock instance @" + GetNgrok());
+            Logger.Debug("Spawned Ngrock instance @" + GetNgrok());
         }
         
         /// <summary>
         /// Get data about the Ngrok instance from the local webserver
         /// </summary>
         /// <returns></returns>
-        public string GetNgrok()
+        private string GetNgrok()
         {
             var wr = WebRequest.Create("http://127.0.0.1:4040/api/tunnels");
 
@@ -82,21 +83,8 @@ namespace NetJoy.Core.NetJoy.Server
             
         }
 
-        //process for killing ngrok instances
-        private readonly Process _taskKill = new Process
-        {
-            StartInfo = new ProcessStartInfo()
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                FileName = "taskkill.exe",
-                RedirectStandardOutput = true,
-                Arguments = "/f /im \"ngrok.exe\""
-            }
-        };
-        
         //Process for creating new ngrok instances
-        private void SpawnNgrock(int port)
+        private void SpawnNgrock()
         {
             new Process
             {

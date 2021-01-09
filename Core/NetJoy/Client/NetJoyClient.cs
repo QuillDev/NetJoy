@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using NetJoy.Core.Config;
 using NetJoy.Core.NetJoy.Client.Handling;
 using NetJoy.Core.NetJoy.Packets;
-using NetJoy.Core.Utils;
+using NetJoy.Core.Utils.General;
 using Newtonsoft.Json;
 using Encoding = System.Text.Encoding;
 
@@ -15,19 +13,12 @@ namespace NetJoy.Core.NetJoy.Client
 {
     public class NetJoyClient
     {
-        private readonly Configuration _configuration; // the config file
-        
         private Socket _client; //the client socket
         private JoyHandler _joyHandler; // the joystick handler instance
         
         // ManualResetEvent instances signal completion.  
         private readonly ManualResetEvent _connectDone = new ManualResetEvent(false);
-        
-        public NetJoyClient(Configuration configuration)
-        {
-            _configuration = configuration;
-        }
-        
+
         /// <summary>
         /// Start the net joy client
         /// </summary>

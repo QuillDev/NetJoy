@@ -4,10 +4,8 @@ using Nefarius.ViGEm.Client;
 using Nefarius.ViGEm.Client.Targets;
 using Nefarius.ViGEm.Client.Targets.Xbox360;
 using NetJoy.Core.NetJoy.Packets;
-using NetJoy.Core.Utils;
 using NetJoy.Core.Utils.Controller;
-using SharpDX.DirectInput;
-using vJoyInterfaceWrap;
+using NetJoy.Core.Utils.General;
 using static System.Int16;
 
 namespace NetJoy.Core.NetJoy.Client.Handling

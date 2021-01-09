@@ -3,9 +3,7 @@ NetJoy is a bundled client/server application that can send joystick/controller 
 from one computer to another remotely over the network.
 
 # Support
-Currently the only supported platform is windows but linux support
-is planned in the near future! This is due to using the windows binaries for "ngrok" and "taskkill".
-
+Currently the only supported platform is Windows, Linux is planned in the future!
 
 # Example Config
 ````toml
@@ -23,13 +21,14 @@ port = 6069
 > EXTRA STEP FOR SERVERS
 * Open config.toml and set isServer to true.
 * Change port to your desired port number.
-* configure ngrok to use your ngrok token [FROM HERE](https://ngrok.com/) by running 
+* configure ngrok using your ngrok token [FROM HERE](https://ngrok.com/) by running the below code in the NeyJoy Directory
 ```
+cd PATH_TO_NETJOY_FOLDER
 ngrok authtoken TOKEN_GOES_HERE
 ```
 
 > EXTRA STEP FOR CLIENTS
-* Install vJoy from [here](http://vjoystick.sourceforge.net/site/index.php/download-a-install/download)
+* Install ViGEm from [here](https://github.com/ViGEm/ViGEmBus)
 * Complete install & restart
 > Both Clients & Servers
-* Run NetJoy.exe & follow instructions.
+* Run NetJoy.exe & follow instructions in the application for setting up your server/client.
