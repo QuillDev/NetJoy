@@ -1,6 +1,5 @@
 ﻿[![Codacy Badge](https://app.codacy.com/project/badge/Grade/85194601df794282adcf5332d0ddadcd)](https://www.codacy.com/gh/QuillDev/NetJoy/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=QuillDev/NetJoy&amp;utm_campaign=Badge_Grade)
 
-
 # NetJoy - Wireless Controller Node
 NetJoy is a bundled client/server application that can send joystick/controller input
 from one computer to another remotely over the network.
