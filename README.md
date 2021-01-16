@@ -34,3 +34,7 @@ ngrok authtoken TOKEN_GOES_HERE
 *   Complete install & restart
 > Both Clients & Servers
 *   Run NetJoy.exe & follow instructions in the application for setting up your server/client.
+
+# CLI Interface
+You can also access NetJoy through the command line by adding it to your Path [GUIDE](https://stackoverflow.com/questions/44272416/how-to-add-a-folder-to-path-environment-variable-in-windows-10-with-screensho).
+![](./Guides/Assets/cli_usage.gif)
